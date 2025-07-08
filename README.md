@@ -7,10 +7,15 @@ This repository contains a simple Python tool to simulate drawing cards from a s
 Run the simulator with Python 3:
 
 ```bash
-python3 highlow.py
+python3 highlow.py [--manual]
 ```
 
-Press Enter to draw a new card. After each draw, the script prints:
+By default the simulator draws random cards from the deck each time you press
+Enter. Use the `--manual` option to manually enter the sequence of cards as
+they are revealed.
+
+Press Enter (or provide ranks in manual mode) to draw a new card. After each
+draw, the script prints:
 
 - The card drawn
 - The number of cards left in the deck
