@@ -12,7 +12,9 @@ python3 highlow.py [--manual]
 
 By default the simulator draws random cards from the deck each time you press
 Enter. Use the `--manual` option to manually enter the sequence of cards as
-they are revealed.
+they are revealed. In manual mode you can type `s` whenever the dealer
+reshuffles. The program will reset the deck, keeping only the two cards
+currently on the table out of play.
 
 Press Enter (or provide ranks in manual mode) to draw a new card. After each
 draw, the script prints:
