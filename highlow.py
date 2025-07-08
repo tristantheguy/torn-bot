@@ -32,10 +32,21 @@ def parse_rank(value: str) -> int:
 
 class Deck:
     """Represents a deck of playing cards."""
+
     def __init__(self) -> None:
         self.remaining = [Card(rank, suit) for suit in SUITS for rank in range(2, 15)]
-        self.played = []
+        self.played: list[Card] = []
         self.shuffle()
+
+    def reset(self, exclude: list[int] | None = None) -> None:
+        """Reset to a full shuffled deck excluding given ranks."""
+        self.__init__()
+        exclude = exclude or []
+        for rank in exclude:
+            try:
+                self.remove_rank(rank)
+            except RuntimeError:
+                pass
 
     def shuffle(self) -> None:
         random.shuffle(self.remaining)
@@ -87,11 +98,19 @@ def automatic_game() -> None:
 
 def manual_game() -> None:
     deck = Deck()
-    print("Manual High-Low assistant. Type 'exit' to quit.")
-    while deck.remaining:
-        down = input("\nFirst card face down (rank): ").strip()
-        if not down or down.lower() in {"exit", "quit"}:
+    last_revealed: int | None = None
+    print("Manual High-Low assistant. Type 'exit' to quit or 's' to shuffle.")
+    while True:
+        if not deck.remaining:
+            print("Game over.")
+            return
+        down = input("\nFirst card face down (rank or 's'): ").strip().lower()
+        if not down or down in {"exit", "quit"}:
             break
+        if down == "s":
+            deck.reset([r for r in [last_revealed] if r is not None])
+            print("Deck reshuffled.")
+            continue
         try:
             rank = parse_rank(down)
             deck.remove_rank(rank)
@@ -99,19 +118,27 @@ def manual_game() -> None:
             print(exc)
             continue
         if deck.remaining:
-            p_high, p_low, suggestion = deck.probability_next(Card(rank, ''))
+            p_high, p_low, suggestion = deck.probability_next(Card(rank, ""))
             print(f"Probability next card is higher: {p_high:.2%}")
             print(f"Probability next card is lower: {p_low:.2%}")
             print(f"Suggested guess: {suggestion}")
-        reveal = input("Revealed card (rank): ").strip()
-        if not reveal:
+        while True:
+            reveal = input("Revealed card (rank or 's'): ").strip().lower()
+            if not reveal:
+                return
+            if reveal == "s":
+                deck.reset([r for r in [rank, last_revealed] if r is not None])
+                print("Deck reshuffled.")
+                continue
+            try:
+                last_revealed = parse_rank(reveal)
+                deck.remove_rank(last_revealed)
+            except Exception as exc:
+                print(exc)
+                continue
             break
-        try:
-            deck.remove_rank(parse_rank(reveal))
-        except Exception as exc:
-            print(exc)
-            continue
         print(f"Cards left: {len(deck.remaining)}")
+
     print("Game over.")
 
 
